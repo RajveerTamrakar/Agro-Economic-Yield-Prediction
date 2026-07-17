@@ -1,23 +1,20 @@
 import streamlit as st
 import pandas as pd
 
+st.set_page_config(page_title="Farmer Income Insights Dashboard", page_icon="🚜")
+
 st.title("🚜 Farmer Income Insights Dashboard")
 st.write("Welcome to Rajveer's Agro-Economic Analytics App!")
 
-# Automatically load the dataset from your GitHub folder behind the scenes
-@st.cache_data
-def load_data():
-    return pd.read_csv("Agro Dataset.csv")
+uploaded_file = st.file_uploader("Upload your Trilytics Dataset CSV file to view insights", type=["csv"])
 
-try:
-    df = load_data()
-    
-    # Show data overview
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+
     st.subheader("📊 Dataset Overview")
-    st.write(f"This application is directly analyzing {df.shape[0]} records of agricultural profiles across multiple data features.")
+    st.write(f"Loaded {df.shape[0]} rows and {df.shape[1]} columns successfully.")
     st.dataframe(df.head(10))
-    
-    # Simple dynamic filtering
+
     st.subheader("🔍 Filter Data by Region")
     if 'REGION' in df.columns:
         regions = df['REGION'].unique()
@@ -25,6 +22,5 @@ try:
         filtered_df = df[df['REGION'] == selected_region]
         st.write(f"Showing data for {selected_region} region:")
         st.dataframe(filtered_df.head(20))
-        
-except FileNotFoundError:
-    st.error("Could not automatically locate 'Agro Dataset.csv' in the repository. Please make sure the filename matches exactly.")
+    else:
+        st.warning("No 'REGION' column found in the uploaded file.")
