@@ -1,27 +1,27 @@
 import streamlit as st
 import pandas as pd
-import joblib
 
-st.title("🚜 Farmer Income Predictor")
+st.title("🚜 Farmer Income Insights Dashboard")
+st.write("Welcome to Rajveer's Agro-Economic Analytics App!")
 
-# Ask the user for the data
-total_land = st.number_input("Total Land For Agriculture (Hectares)", value=2.5)
-non_agri_inc = st.number_input("Non-Agriculture Income (₹)", value=50000)
-agro_econ_score = st.slider("Agro-Economic Score", 0.0, 100.0, 50.0)
-access_score = st.slider("Market Access Score", -100.0, 100.0, -10.0)
+# Upload the CSV directly on the web app
+uploaded_file = st.file_uploader("Upload your Agro Dataset CSV file to view insights", type=["csv"])
 
-if st.button("Predict Income"):
-    # Load your saved model
-    model = joblib.load("agro_model.pkl")
-
-    # Put the inputs into a tiny table for the model
-    input_data = pd.DataFrame([{
-        'Total_Land_For_Agriculture': total_land,
-        'Non_Agriculture_Income': non_agri_inc,
-        'agro_econ_score': agro_econ_score,
-        'access_score': access_score
-    }])
-
-    # Predict!
-    prediction = model.predict(input_data)[0]
-    st.success(f"Estimated Farmer Income: ₹{max(0, prediction):,.2f}")
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    
+    # Show data overview
+    st.subheader("📊 Dataset Overview")
+    st.write(f"Loaded {df.shape[0]} rows and {df.shape[1]} columns successfully.")
+    st.dataframe(df.head(10))
+    
+    # Simple dynamic filtering
+    st.subheader("🔍 Filter Data by Region")
+    if 'REGION' in df.columns:
+        regions = df['REGION'].unique()
+        selected_region = st.selectbox("Select a Region to filter:", regions)
+        filtered_df = df[df['REGION'] == selected_region]
+        st.write(f"Showing data for {selected_region} region:")
+        st.dataframe(filtered_df.head(20))
+    else:
+        st.warning("Could not find a 'REGION' column in this CSV file.")
